@@ -56,7 +56,7 @@ fig_histogram.add_trace(go.Histogram(
     xbins=dict(  
         start=0,
         end=150000,
-        size=(150000 - 0) / 50
+        size=(150000 - 0) / 20
     ),
     hovertemplate=(
         "Salario: €%{x:,.0f}<br>" +
@@ -91,7 +91,7 @@ fig_histogram.update_layout(
     xaxis=dict(range=[0, 150000])
 )
 
-st.plotly_chart(fig_histogram, use_container_width=True)
+st.plotly_chart(fig_histogram, width='stretch')
 st.divider()
 
 
@@ -164,17 +164,18 @@ fig_combined.update_layout(
     yaxis_title='<b>Densidad de Probabilidad</b>',
     showlegend=True,
     xaxis=dict(
-        range=[0, 200000],
+        range=[0, 170000],
         tickformat='€,.0f'
     ),
     yaxis=dict(
         tickformat='.2f'
     ),
     font=dict(size=12),
-    margin=dict(t=80, b=80)
+    margin=dict(t=80, b=80),
+    legend=dict(orientation="h", yanchor="bottom", y=-0.4, xanchor="center", x=0.5)
 )
 
-st.plotly_chart(fig_combined, use_container_width=True)
+st.plotly_chart(fig_combined, width='stretch')
 st.divider()
 
 # --- Salario Medio por Nivel Administrativo ---
@@ -233,11 +234,12 @@ fig.update_yaxes(title_text="Salario Medio Anual (€)", secondary_y=False, show
 fig.update_yaxes(title_text="Porcentaje de Empleados (%)", secondary_y=True, showgrid=False)
 fig.update_layout(height=500, legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1.0))
 
-st.plotly_chart(fig, use_container_width=True)
+st.plotly_chart(fig, width='stretch')
 st.divider()
 
 # --- Salario Medio por Tipo de Cargo ---
 st.subheader("Salario Medio por Tipo de Cargo")
+st.markdown("Cada punto es un cargo diferente, prueba a tocar uno")
 salary_by_role = (
     df.groupby('role_name')['currentAnnualSalary']
       .agg(mean='mean', count='count')
@@ -267,10 +269,11 @@ fig_role_scatter.update_traces(marker=dict(size=10, opacity=0.85))
 fig_role_scatter.update_layout(
     height=500,
     showlegend=False,
-    xaxis=dict(tickformat='€,.0f')
+    xaxis=dict(tickformat='€,.0f'),
+    coloraxis_showscale=False
 )
 
-st.plotly_chart(fig_role_scatter, use_container_width=True)
+st.plotly_chart(fig_role_scatter, width='stretch')
 
 st.divider()
 
@@ -298,6 +301,8 @@ salary_by_affiliation = df.groupby('affiliation_slug').agg(
 affiliation_display = []
 for aff in salary_by_affiliation.index:
     party_name = affiliation_names.get(aff, aff.upper())
+    if len(party_name) > 10:
+        party_name = party_name[:10]+"..." 
     n_people = salary_by_affiliation.loc[aff, 'count']
     affiliation_display.append(f"{party_name} (n={n_people})")
 
@@ -308,9 +313,7 @@ fig_aff_salary = px.bar(
     y=affiliation_display,
     orientation='h',
     text=salary_by_affiliation['mean_salary'].values,
-    labels={'x': 'Salario Medio Anual (€)', 'y': 'Partido'},
-    color=salary_by_affiliation['mean_salary'].values,
-    color_continuous_scale='RdYlGn'
+    labels={'x': 'Salario Medio Anual (€)', 'y': ''},
 )
 fig_aff_salary.update_traces(texttemplate='€%{text:,.0f}', textposition='outside')
 fig_aff_salary.update_traces(
@@ -323,9 +326,9 @@ fig_aff_salary.update_traces(
 fig_aff_salary.update_layout(
     showlegend=False, 
     height=chart_height,
-    yaxis={'categoryorder': 'total ascending'}
+    yaxis={'categoryorder': 'total ascending', 'automargin': True}
 )
-st.plotly_chart(fig_aff_salary, use_container_width=True)
+st.plotly_chart(fig_aff_salary, width='stretch')
 
 st.divider()
 
@@ -365,7 +368,7 @@ mayor_info = (
 mayor_info = mayor_info.rename(columns={'name': 'mayor_name', 'currentAnnualSalary': 'mayor_salary'})
 map_df = pd.merge(map_df, mayor_info, on='municipio', how='left')
 
-fig_map = px.scatter_mapbox(
+fig_map = px.scatter_map(
     map_df,
     lat='lat',
     lon='lon',
@@ -398,10 +401,17 @@ fig_map = px.scatter_mapbox(
 fig_map.update_layout(
     mapbox_style='carto-positron',
     margin=dict(l=0, r=0, t=0, b=0),
-    coloraxis_colorbar=dict(title='Salario Medio (€)')
+    coloraxis_colorbar=dict(
+        title='Salario (€)',
+        orientation='h',
+        yanchor='bottom',
+        y=-0.1,
+        xanchor='center',
+        x=0.5
+    )
 )
 
-st.plotly_chart(fig_map, use_container_width=True)
+st.plotly_chart(fig_map, width='stretch')
 
 st.metric("Municipios con datos", present_count)
 
