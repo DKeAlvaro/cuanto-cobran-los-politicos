@@ -104,11 +104,7 @@
     }
 
     .metric {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 18px;
-      box-shadow: var(--shadow);
+      padding: 12px 0;
     }
 
     .metric-label {
@@ -124,11 +120,8 @@
     }
 
     .section {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 20px;
-      box-shadow: var(--shadow);
+      padding: 32px 0;
+      border-top: 1px solid var(--border);
     }
 
     .section + .section {
@@ -137,11 +130,20 @@
 
     .plot {
       width: 100%;
-      min-height: 420px;
+      height: 420px;
     }
 
     .plot.large {
-      min-height: 720px;
+      height: 720px;
+    }
+
+    @media (max-width: 600px) {
+      .plot {
+        height: 350px;
+      }
+      .plot.large {
+        height: 500px;
+      }
     }
 
     .muted {
@@ -561,15 +563,17 @@
 
       const layout = {
         height: 420,
-        margin: { t: 30, r: 30, b: 60, l: 70 },
+        margin: window.innerWidth < 600 ? { t: 20, r: 10, b: 40, l: 40 } : { t: 30, r: 30, b: 60, l: 70 },
         xaxis: {
-          title: "Salario Anual (€)",
+          title: window.innerWidth < 600 ? "" : "Salario Anual (€)",
           range: [0, 150000],
           tickprefix: "€",
-          tickformat: ",.0f"
+          tickformat: ",.0f",
+          automargin: true
         },
         yaxis: {
-          title: "Frecuencia"
+          title: window.innerWidth < 600 ? "" : "Frecuencia",
+          automargin: true
         },
         showlegend: false,
         shapes: [
@@ -717,16 +721,18 @@
 
       const layout = {
         height: 480,
-        margin: { t: 60, r: 30, b: 100, l: 80 },
+        margin: window.innerWidth < 600 ? { t: 40, r: 10, b: 80, l: 40 } : { t: 60, r: 30, b: 100, l: 80 },
         xaxis: {
           title: "<b>Salario Anual (€)</b>",
           range: [0, 170000],
           tickprefix: "€",
-          tickformat: ",.0f"
+          tickformat: ",.0f",
+          automargin: true
         },
         yaxis: {
-          title: "<b>Densidad de Probabilidad</b>",
-          tickformat: ".2f"
+          title: window.innerWidth < 600 ? "" : "<b>Densidad</b>",
+          tickformat: ".2f",
+          automargin: true
         },
         legend: {
           orientation: "h",
@@ -797,31 +803,36 @@
 
       const layout = {
         height: 520,
-        margin: { t: 70, r: 80, b: 90, l: 80 },
+        margin: window.innerWidth < 600 ? { t: 50, r: 40, b: 80, l: 50 } : { t: 70, r: 80, b: 90, l: 80 },
         xaxis: {
-          title: "Nivel administrativo",
+          title: window.innerWidth < 600 ? "" : "Nivel administrativo",
           showgrid: false,
-          autorange: "reversed"
+          autorange: "reversed",
+          tickangle: window.innerWidth < 600 ? -45 : 0,
+          automargin: true
         },
         yaxis: {
-          title: "Salario Medio Anual (€)",
+          title: window.innerWidth < 600 ? "" : "Salario Medio (€)",
           showgrid: false,
           tickprefix: "€",
-          tickformat: ",.0f"
+          tickformat: ",.0f",
+          automargin: true
         },
         yaxis2: {
-          title: "Porcentaje de Empleados (%)",
+          title: window.innerWidth < 600 ? "" : "Porcentaje (%)",
           overlaying: "y",
           side: "right",
           showgrid: false,
-          ticksuffix: "%"
+          ticksuffix: "%",
+          automargin: true
         },
         legend: {
           orientation: "h",
           yanchor: "bottom",
-          y: 1.08,
-          xanchor: "right",
-          x: 1
+          y: 1.02,
+          xanchor: "center",
+          x: 0.5,
+          font: { size: window.innerWidth < 600 ? 10 : 12 }
         }
       };
 
@@ -853,15 +864,17 @@
 
       const layout = {
         height: 520,
-        margin: { t: 30, r: 30, b: 70, l: 80 },
+        margin: window.innerWidth < 600 ? { t: 20, r: 20, b: 50, l: 50 } : { t: 30, r: 30, b: 70, l: 80 },
         showlegend: false,
         xaxis: {
-          title: "Número de Empleados"
+          title: "Número de Empleados",
+          automargin: true
         },
         yaxis: {
-          title: "Salario Medio Anual (€)",
+          title: window.innerWidth < 600 ? "" : "Salario Medio Anual (€)",
           tickprefix: "€",
-          tickformat: ",.0f"
+          tickformat: ",.0f",
+          automargin: true
         }
       };
 
@@ -1141,13 +1154,7 @@
         });
 
         window.addEventListener("resize", () => {
-          [
-            "histogram",
-            "genderKde",
-            "adminLevel",
-            "roleScatter",
-            "map"
-          ].forEach(id => Plotly.Plots.resize(document.getElementById(id)));
+          renderAll(); // Re-render to apply responsive layout logic
         });
       } catch (error) {
         console.error(error);
