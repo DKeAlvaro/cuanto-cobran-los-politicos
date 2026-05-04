@@ -1,0 +1,1169 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Salarios Públicos España</title>
+
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --primary: #6366f1;
+      --shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 32px 20px 64px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      letter-spacing: -0.04em;
+    }
+
+    h2 {
+      margin: 0 0 16px;
+      font-size: 1.45rem;
+      letter-spacing: -0.02em;
+    }
+
+    p {
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    hr {
+      border: 0;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin: 20px 0 28px;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-weight: 650;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+    }
+
+    .button:hover {
+      border-color: #cbd5e1;
+      text-decoration: none;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .metric {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .metric-label {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 8px;
+    }
+
+    .metric-value {
+      font-size: clamp(1.4rem, 3vw, 2rem);
+      font-weight: 800;
+      letter-spacing: -0.035em;
+    }
+
+    .section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    .section + .section {
+      margin-top: 28px;
+    }
+
+    .plot {
+      width: 100%;
+      min-height: 420px;
+    }
+
+    .plot.large {
+      min-height: 720px;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin: 8px 0 18px;
+    }
+
+    .checkbox {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    input[type="text"] {
+      width: min(520px, 100%);
+      border: 1px solid var(--border);
+      background: #fff;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font: inherit;
+      outline: none;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    }
+
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: #fff;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.94rem;
+    }
+
+    th,
+    td {
+      padding: 11px 12px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    th {
+      background: #f8fafc;
+      color: #334155;
+      font-weight: 750;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .loader {
+      background: #eef2ff;
+      border: 1px solid #c7d2fe;
+      color: #3730a3;
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin: 20px 0;
+      font-weight: 650;
+    }
+
+    .error {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin: 20px 0;
+      font-weight: 650;
+    }
+
+    @media (max-width: 900px) {
+      .metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 560px) {
+      .metrics {
+        grid-template-columns: 1fr;
+      }
+
+      .container {
+        padding: 24px 14px 48px;
+      }
+
+      .section {
+        padding: 14px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="container">
+    <h1>Salarios de políticos en España</h1>
+    <p id="subtitle">
+      Datos extraídos de
+      <a href="https://transparentia.newtral.es/" target="_blank" rel="noopener noreferrer">
+        transparentia.newtral.es
+      </a>
+    </p>
+
+    <div id="status" class="loader">Cargando datos…</div>
+
+    <div id="app" style="display:none;">
+      <div class="topbar">
+        <button class="button" id="downloadCsv">Descargar CSV</button>
+      </div>
+
+      <section class="metrics">
+        <div class="metric">
+          <div class="metric-label">Total de Cargos</div>
+          <div class="metric-value" id="metricTotal">—</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Salario Medio Anual</div>
+          <div class="metric-value" id="metricMean">—</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Salario Máximo</div>
+          <div class="metric-value" id="metricMax">—</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Suma Total de Salarios</div>
+          <div class="metric-value" id="metricSum">—</div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Distribución de Salarios</h2>
+        <div id="histogram" class="plot"></div>
+      </section>
+
+      <section class="section">
+        <h2>Salario por Géneros</h2>
+        <div id="genderKde" class="plot"></div>
+      </section>
+
+      <section class="section">
+        <h2>Salario Medio por Nivel Administrativo</h2>
+        <div id="adminLevel" class="plot"></div>
+      </section>
+
+      <section class="section">
+        <h2>Salario Medio por Tipo de Cargo</h2>
+        <p class="muted">Cada punto es un cargo diferente, prueba a tocar uno.</p>
+        <div id="roleScatter" class="plot"></div>
+      </section>
+
+      <section class="section">
+        <h2>Partidos Políticos con mayor salario medio</h2>
+        <p class="muted">Mostrando partidos con 5 o más integrantes.</p>
+        <div class="table-wrap">
+          <table id="partyTable"></table>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Mapa Interactivo de España</h2>
+        <p class="muted">Explora el salario medio de alcaldes por municipio.</p>
+
+        <div class="controls">
+          <label class="checkbox">
+            <input type="checkbox" id="excludeZeroSalary" checked />
+            Excluir salarios de 0€
+          </label>
+        </div>
+
+        <div id="map" class="plot large"></div>
+
+        <div class="metrics" style="margin-top:16px; margin-bottom:0;">
+          <div class="metric">
+            <div class="metric-label">Municipios con datos</div>
+            <div class="metric-value" id="metricMunicipios">—</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Explorar Datos</h2>
+        <div class="controls">
+          <input id="searchInput" type="text" placeholder="Buscar en cualquier columna…" />
+        </div>
+        <p id="searchCount" class="muted">Resultados encontrados: —</p>
+        <div class="table-wrap">
+          <table id="dataTable"></table>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const CLEANED_CSV_URL = "cleaned.csv";
+    const GEO_CSV_URL = "municipios_coords.csv";
+
+    const affiliationNames = {
+      "partido-popular": "Partido Popular",
+      "psoe": "PSOE",
+      "sin-partido": "Sin Partido",
+      "cm": "Coalición Madrid",
+      "vox": "VOX",
+      "eh-bildu": "EH Bildu",
+      "erc": "ERC",
+      "eaj-pnv": "EAJ-PNV",
+      "junts-per-catalunya": "Junts",
+      "par": "PAR",
+      "podemos": "Podemos"
+    };
+
+    const genderLabels = {
+      male: "Hombres",
+      female: "Mujeres"
+    };
+
+    const genderColors = {
+      male: "#3b82f6",
+      female: "#ec4899"
+    };
+
+    let dfFull = [];
+    let df = [];
+    let geoDf = [];
+
+    const fmtNumber = new Intl.NumberFormat("es-ES");
+    const fmtEuro = new Intl.NumberFormat("es-ES", {
+      style: "currency",
+      currency: "EUR",
+      maximumFractionDigits: 0
+    });
+
+    function euro(value) {
+      return fmtEuro.format(Number(value) || 0);
+    }
+
+    function number(value) {
+      return fmtNumber.format(Number(value) || 0);
+    }
+
+    function mean(arr) {
+      const clean = arr.filter(Number.isFinite);
+      return clean.length ? clean.reduce((a, b) => a + b, 0) / clean.length : 0;
+    }
+
+    function sum(arr) {
+      return arr.filter(Number.isFinite).reduce((a, b) => a + b, 0);
+    }
+
+    function median(arr) {
+      const clean = arr.filter(Number.isFinite).sort((a, b) => a - b);
+      if (!clean.length) return 0;
+      const mid = Math.floor(clean.length / 2);
+      return clean.length % 2 ? clean[mid] : (clean[mid - 1] + clean[mid]) / 2;
+    }
+
+    function max(arr) {
+      const clean = arr.filter(Number.isFinite);
+      return clean.length ? Math.max(...clean) : 0;
+    }
+
+    function std(arr) {
+      const clean = arr.filter(Number.isFinite);
+      if (clean.length < 2) return 0;
+      const m = mean(clean);
+      const variance = clean.reduce((acc, x) => acc + Math.pow(x - m, 2), 0) / (clean.length - 1);
+      return Math.sqrt(variance);
+    }
+
+    function groupBy(rows, key) {
+      const map = new Map();
+      for (const row of rows) {
+        const k = row[key] ?? "";
+        if (!map.has(k)) map.set(k, []);
+        map.get(k).push(row);
+      }
+      return map;
+    }
+
+    function groupAgg(rows, key, valueKey) {
+      const groups = groupBy(rows, key);
+      return Array.from(groups.entries()).map(([name, items]) => {
+        const values = items.map(d => Number(d[valueKey])).filter(Number.isFinite);
+        return {
+          name,
+          mean: mean(values),
+          count: values.length,
+          sum: sum(values),
+          max: max(values)
+        };
+      });
+    }
+
+    function parseCSV(text, delimiter = ",") {
+      const rows = [];
+      let row = [];
+      let value = "";
+      let inQuotes = false;
+
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        const next = text[i + 1];
+
+        if (char === '"' && inQuotes && next === '"') {
+          value += '"';
+          i++;
+        } else if (char === '"') {
+          inQuotes = !inQuotes;
+        } else if (char === delimiter && !inQuotes) {
+          row.push(value);
+          value = "";
+        } else if ((char === "\n" || char === "\r") && !inQuotes) {
+          if (char === "\r" && next === "\n") i++;
+          row.push(value);
+          value = "";
+          if (row.some(cell => cell.trim() !== "")) rows.push(row);
+          row = [];
+        } else {
+          value += char;
+        }
+      }
+
+      row.push(value);
+      if (row.some(cell => cell.trim() !== "")) rows.push(row);
+
+      if (!rows.length) return [];
+
+      const headers = rows[0].map(h => h.trim());
+      return rows.slice(1).map(values => {
+        const obj = {};
+        headers.forEach((header, index) => {
+          obj[header] = values[index] ?? "";
+        });
+        return obj;
+      });
+    }
+
+    async function loadCSV(url, delimiter = ",") {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`No se pudo cargar ${url}`);
+      }
+      const text = await response.text();
+      return parseCSV(text, delimiter);
+    }
+
+    function normalizeCleanedRows(rows) {
+      return rows.map(row => ({
+        ...row,
+        currentAnnualSalary: Number(row.currentAnnualSalary) || 0
+      }));
+    }
+
+    function renderMetrics() {
+      const salaries = df.map(d => d.currentAnnualSalary);
+
+      document.getElementById("metricTotal").textContent = number(df.length);
+      document.getElementById("metricMean").textContent = euro(mean(salaries));
+      document.getElementById("metricMax").textContent = euro(max(salaries));
+      document.getElementById("metricSum").textContent = euro(sum(salaries));
+
+      const nZero = dfFull.filter(d => d.currentAnnualSalary === 0).length;
+      document.getElementById("subtitle").innerHTML =
+        `Excluyendo ${number(nZero)} cargos con salario anual igual a 0, datos extraídos de ` +
+        `<a href="https://transparentia.newtral.es/" target="_blank" rel="noopener noreferrer">transparentia.newtral.es</a>`;
+    }
+
+    function rgbaFromHex(hex, alpha) {
+      const clean = hex.replace("#", "");
+      const r = parseInt(clean.slice(0, 2), 16);
+      const g = parseInt(clean.slice(2, 4), 16);
+      const b = parseInt(clean.slice(4, 6), 16);
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
+    function makeHistogram() {
+      const salaries = df.map(d => d.currentAnnualSalary);
+      const med = median(salaries);
+      const avg = mean(salaries);
+
+      const trace = {
+        type: "histogram",
+        x: salaries,
+        marker: {
+          color: "#6366f1",
+          line: {
+            width: 1,
+            color: "black"
+          }
+        },
+        xbins: {
+          start: 0,
+          end: 150000,
+          size: 7500
+        },
+        hovertemplate: "Salario: €%{x:,.0f}<br>Frecuencia: %{y}<extra></extra>"
+      };
+
+      const layout = {
+        height: 420,
+        margin: { t: 30, r: 30, b: 60, l: 70 },
+        xaxis: {
+          title: "Salario Anual (€)",
+          range: [0, 150000],
+          tickprefix: "€",
+          tickformat: ",.0f"
+        },
+        yaxis: {
+          title: "Frecuencia"
+        },
+        showlegend: false,
+        shapes: [
+          {
+            type: "line",
+            x0: med,
+            x1: med,
+            y0: 0,
+            y1: 1,
+            xref: "x",
+            yref: "paper",
+            line: {
+              color: "red",
+              width: 2,
+              dash: "dash"
+            }
+          },
+          {
+            type: "line",
+            x0: avg,
+            x1: avg,
+            y0: 0,
+            y1: 1,
+            xref: "x",
+            yref: "paper",
+            line: {
+              color: "green",
+              width: 2,
+              dash: "dot"
+            }
+          }
+        ],
+        annotations: [
+          {
+            x: med,
+            y: 1,
+            xref: "x",
+            yref: "paper",
+            text: `Mediana: ${euro(med)}`,
+            showarrow: false,
+            xanchor: "left",
+            yanchor: "bottom",
+            font: { color: "red" }
+          },
+          {
+            x: avg,
+            y: 1,
+            xref: "x",
+            yref: "paper",
+            text: `Media: ${euro(avg)}`,
+            showarrow: false,
+            xanchor: "right",
+            yanchor: "bottom",
+            font: { color: "green" }
+          }
+        ]
+      };
+
+      Plotly.newPlot("histogram", [trace], layout, { responsive: true, displayModeBar: false });
+    }
+
+    function gaussianKernel(u) {
+      return Math.exp(-0.5 * u * u) / Math.sqrt(2 * Math.PI);
+    }
+
+    function kde(values, xRange) {
+      const clean = values.filter(Number.isFinite);
+      if (clean.length < 2) return xRange.map(() => 0);
+
+      const s = std(clean);
+      const bandwidth = Math.max(1, 1.06 * s * Math.pow(clean.length, -1 / 5));
+
+      return xRange.map(x => {
+        const density = clean.reduce((acc, v) => acc + gaussianKernel((x - v) / bandwidth), 0);
+        return density / (clean.length * bandwidth);
+      });
+    }
+
+    function linspace(start, end, n) {
+      const arr = [];
+      const step = (end - start) / (n - 1);
+      for (let i = 0; i < n; i++) arr.push(start + step * i);
+      return arr;
+    }
+
+    function makeGenderKde() {
+      const xRange = linspace(0, 200000, 500);
+      const traces = [];
+      const shapes = [];
+      const annotations = [];
+
+      ["male", "female"].forEach(gender => {
+        const rows = df.filter(d => d.gender === gender);
+        const salaries = rows.map(d => d.currentAnnualSalary);
+        const y = kde(salaries, xRange).map(v => v * 10000);
+        const avg = mean(salaries);
+        const color = genderColors[gender];
+        const label = genderLabels[gender];
+
+        traces.push({
+          type: "scatter",
+          mode: "lines",
+          x: xRange,
+          y,
+          name: `${label} (n=${number(rows.length)})`,
+          line: {
+            color,
+            width: 3
+          },
+          fill: "tozeroy",
+          fillcolor: rgbaFromHex(color, 0.1),
+          hovertemplate:
+            "<b>%{fullData.name}</b><br>" +
+            "Salario: €%{x:,.2f}<br>" +
+            "Densidad: %{y:.2f}<extra></extra>"
+        });
+
+        shapes.push({
+          type: "line",
+          x0: avg,
+          x1: avg,
+          y0: 0,
+          y1: 1,
+          xref: "x",
+          yref: "paper",
+          line: {
+            color,
+            width: 2,
+            dash: "dash"
+          },
+          opacity: 0.8
+        });
+
+        annotations.push({
+          x: avg,
+          y: gender === "male" ? 1.03 : 0.94,
+          xref: "x",
+          yref: "paper",
+          text: `Media ${label}: ${euro(avg)}`,
+          showarrow: false,
+          font: { color },
+          bgcolor: "rgba(255,255,255,0.85)"
+        });
+      });
+
+      const layout = {
+        height: 480,
+        margin: { t: 60, r: 30, b: 100, l: 80 },
+        xaxis: {
+          title: "<b>Salario Anual (€)</b>",
+          range: [0, 170000],
+          tickprefix: "€",
+          tickformat: ",.0f"
+        },
+        yaxis: {
+          title: "<b>Densidad de Probabilidad</b>",
+          tickformat: ".2f"
+        },
+        legend: {
+          orientation: "h",
+          yanchor: "bottom",
+          y: -0.35,
+          xanchor: "center",
+          x: 0.5
+        },
+        shapes,
+        annotations
+      };
+
+      Plotly.newPlot("genderKde", traces, layout, { responsive: true, displayModeBar: false });
+    }
+
+    function makeAdminLevelChart() {
+      const grouped = groupAgg(df, "spatial_name", "currentAnnualSalary")
+        .filter(d => d.name && d.name.trim() !== "")
+        .sort((a, b) => b.mean - a.mean);
+
+      const totalCount = grouped.reduce((acc, d) => acc + d.count, 0);
+      const names = grouped.map(d => d.name);
+      const means = grouped.map(d => d.mean);
+      const counts = grouped.map(d => d.count);
+      const percents = grouped.map(d => totalCount ? (d.count / totalCount) * 100 : 0);
+
+      const bar = {
+        type: "bar",
+        x: names,
+        y: means,
+        name: "Salario medio",
+        text: means,
+        texttemplate: "€%{text:,.0f}",
+        textposition: "outside",
+        marker: {
+          color: means,
+          colorscale: "Blues",
+          showscale: false
+        },
+        customdata: counts,
+        hovertemplate:
+          "<b>%{x}</b><br>" +
+          "Salario medio: €%{y:,.0f}<br>" +
+          "Empleados: %{customdata}<extra></extra>"
+      };
+
+      const line = {
+        type: "scatter",
+        mode: "lines+markers",
+        x: names,
+        y: percents,
+        name: "Porcentaje de empleados",
+        yaxis: "y2",
+        marker: {
+          color: "rgba(200, 0, 0, 0.8)",
+          size: 8
+        },
+        line: {
+          color: "rgba(200, 0, 0, 0.6)",
+          width: 2
+        },
+        customdata: counts,
+        hovertemplate:
+          "<b>%{x}</b><br>" +
+          "Porcentaje: %{y:.1f}%<br>" +
+          "Empleados: %{customdata}<extra></extra>"
+      };
+
+      const layout = {
+        height: 520,
+        margin: { t: 70, r: 80, b: 90, l: 80 },
+        xaxis: {
+          title: "Nivel administrativo",
+          showgrid: false,
+          autorange: "reversed"
+        },
+        yaxis: {
+          title: "Salario Medio Anual (€)",
+          showgrid: false,
+          tickprefix: "€",
+          tickformat: ",.0f"
+        },
+        yaxis2: {
+          title: "Porcentaje de Empleados (%)",
+          overlaying: "y",
+          side: "right",
+          showgrid: false,
+          ticksuffix: "%"
+        },
+        legend: {
+          orientation: "h",
+          yanchor: "bottom",
+          y: 1.08,
+          xanchor: "right",
+          x: 1
+        }
+      };
+
+      Plotly.newPlot("adminLevel", [bar, line], layout, { responsive: true, displayModeBar: false });
+    }
+
+    function makeRoleScatter() {
+      const grouped = groupAgg(df, "role_name", "currentAnnualSalary")
+        .sort((a, b) => b.mean - a.mean);
+
+      const trace = {
+        type: "scatter",
+        mode: "markers",
+        x: grouped.map(d => d.count),
+        y: grouped.map(d => d.mean),
+        text: grouped.map(d => d.name),
+        marker: {
+          size: 10,
+          opacity: 0.85,
+          color: grouped.map(d => d.mean),
+          colorscale: "Viridis",
+          showscale: false
+        },
+        hovertemplate:
+          "<b>%{text}</b><br>" +
+          "Empleados: %{x}<br>" +
+          "Salario medio: €%{y:,.0f}<extra></extra>"
+      };
+
+      const layout = {
+        height: 520,
+        margin: { t: 30, r: 30, b: 70, l: 80 },
+        showlegend: false,
+        xaxis: {
+          title: "Número de Empleados"
+        },
+        yaxis: {
+          title: "Salario Medio Anual (€)",
+          tickprefix: "€",
+          tickformat: ",.0f"
+        }
+      };
+
+      Plotly.newPlot("roleScatter", [trace], layout, { responsive: true, displayModeBar: false });
+    }
+
+    function renderTable(elementId, rows, columns) {
+      const table = document.getElementById(elementId);
+
+      if (!rows.length) {
+        table.innerHTML = "<tbody><tr><td>No hay resultados.</td></tr></tbody>";
+        return;
+      }
+
+      const thead = `
+        <thead>
+          <tr>${columns.map(col => `<th>${escapeHtml(col.label)}</th>`).join("")}</tr>
+        </thead>
+      `;
+
+      const tbody = `
+        <tbody>
+          ${rows.map(row => `
+            <tr>
+              ${columns.map(col => `<td>${escapeHtml(col.format ? col.format(row[col.key], row) : row[col.key])}</td>`).join("")}
+            </tr>
+          `).join("")}
+        </tbody>
+      `;
+
+      table.innerHTML = thead + tbody;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function makePartyTable() {
+      const grouped = groupAgg(df, "affiliation_slug", "currentAnnualSalary")
+        .filter(d => d.count >= 5)
+        .sort((a, b) => b.mean - a.mean)
+        .map(d => ({
+          party: affiliationNames[d.name] || String(d.name).toUpperCase(),
+          meanSalary: d.mean
+        }));
+
+      renderTable("partyTable", grouped, [
+        { key: "party", label: "Partido Político" },
+        { key: "meanSalary", label: "Salario Medio", format: euro }
+      ]);
+    }
+
+    function cleanMunicipalityName(value) {
+      let out = String(value ?? "").replace(/^Ayuntamiento De\s*/i, "");
+      if (out.includes("/")) out = out.split("/")[0];
+      return out.trim();
+    }
+
+    function makeMap() {
+      const excludeZero = document.getElementById("excludeZeroSalary").checked;
+
+      let mayors = dfFull
+        .filter(d => d.role_name === "Alcalde")
+        .map(d => ({
+          ...d,
+          municipality: cleanMunicipalityName(d.member_of_name)
+        }));
+
+      if (excludeZero) {
+        mayors = mayors.filter(d => d.currentAnnualSalary > 0);
+      }
+
+      const geoMap = new Map(
+        geoDf
+          .filter(d => d.municipality && d.geoPoint)
+          .map(d => [d.municipality, d.geoPoint])
+      );
+
+      const mayorLocations = mayors.map(d => d.municipality);
+      const presentCount = mayorLocations.filter(m => geoMap.has(m)).length;
+
+      const grouped = groupBy(mayors, "municipality");
+      const municipalityAgg = Array.from(grouped.entries()).map(([municipality, items]) => {
+        const salaries = items.map(d => d.currentAnnualSalary);
+        const first = items[0] || {};
+        return {
+          municipality,
+          mean_salary: mean(salaries),
+          count: salaries.length,
+          max_salary: max(salaries),
+          mayor_name: first.name || "",
+          mayor_salary: first.currentAnnualSalary || 0
+        };
+      });
+
+      const mapRows = municipalityAgg
+        .filter(d => geoMap.has(d.municipality))
+        .map(d => {
+          const parts = geoMap.get(d.municipality).split(",");
+          return {
+            ...d,
+            lat: Number(parts[0]),
+            lon: Number(parts[1])
+          };
+        })
+        .filter(d => Number.isFinite(d.lat) && Number.isFinite(d.lon));
+
+      document.getElementById("metricMunicipios").textContent = number(presentCount);
+
+      const trace = {
+        type: "scattermapbox",
+        lat: mapRows.map(d => d.lat),
+        lon: mapRows.map(d => d.lon),
+        mode: "markers",
+        text: mapRows.map(d => d.municipality),
+        customdata: mapRows.map(d => [
+          d.mayor_name,
+          d.mayor_salary,
+          d.mean_salary,
+          d.count,
+          d.max_salary
+        ]),
+        marker: {
+          size: mapRows.map(d => Math.max(4, Math.min(12, 4 + d.count))),
+          color: mapRows.map(d => d.mean_salary),
+          colorscale: "Viridis",
+          colorbar: {
+            title: "Salario (€)",
+            orientation: "h",
+            y: -0.12,
+            x: 0.5,
+            xanchor: "center"
+          },
+          opacity: 0.85
+        },
+        hovertemplate:
+          "<b>%{text}</b><br>" +
+          "Alcalde: %{customdata[0]}<br>" +
+          "Salario: €%{customdata[1]:,.0f}<br>" +
+          "Salario medio: €%{customdata[2]:,.0f}<br>" +
+          "Número de cargos: %{customdata[3]}<extra></extra>"
+      };
+
+      const layout = {
+        height: 720,
+        margin: { l: 0, r: 0, t: 0, b: 0 },
+        mapbox: {
+          style: "carto-positron",
+          center: {
+            lat: 40.2,
+            lon: -3.7
+          },
+          zoom: 5.2
+        }
+      };
+
+      Plotly.newPlot("map", [trace], layout, { responsive: true });
+    }
+
+    function renderSearchTable() {
+      const input = document.getElementById("searchInput");
+      const term = input.value.trim().toLowerCase();
+
+      let filtered = dfFull;
+
+      if (term) {
+        filtered = dfFull.filter(row =>
+          Object.values(row).some(value =>
+            String(value ?? "").toLowerCase().includes(term)
+          )
+        );
+      }
+
+      filtered = [...filtered].sort((a, b) => b.currentAnnualSalary - a.currentAnnualSalary);
+
+      document.getElementById("searchCount").textContent =
+        `Resultados encontrados: ${number(filtered.length)}`;
+
+      // Limit display to top 100 to keep DOM responsive
+      const displayRows = filtered.slice(0, 100);
+
+      renderTable("dataTable", displayRows, [
+        { key: "name", label: "Nombre" },
+        { key: "currentAnnualSalary", label: "Salario Anual", format: euro },
+        { key: "jobTitle", label: "Cargo" },
+        { key: "role_name", label: "Tipo de Cargo" },
+        { key: "affiliation_slug", label: "Partido" },
+        { key: "member_of_name", label: "Institución" }
+      ]);
+
+      if (filtered.length > 100) {
+        const table = document.getElementById("dataTable");
+        const note = document.createElement("tr");
+        note.innerHTML = `<td colspan="6" style="text-align:center; color:var(--muted); padding: 20px;">Mostrando los primeros 100 de ${number(filtered.length)} resultados. Refina tu búsqueda para ver más.</td>`;
+        table.querySelector("tbody").appendChild(note);
+      }
+    }
+
+    function toCSV(rows) {
+      if (!rows.length) return "";
+      const headers = Object.keys(rows[0]);
+
+      const escapeCell = value => {
+        const str = String(value ?? "");
+        if (/[",\n\r]/.test(str)) {
+          return `"${str.replaceAll('"', '""')}"`;
+        }
+        return str;
+      };
+
+      return [
+        headers.join(","),
+        ...rows.map(row => headers.map(h => escapeCell(row[h])).join(","))
+      ].join("\n");
+    }
+
+    function setupDownload() {
+      document.getElementById("downloadCsv").addEventListener("click", () => {
+        const csv = toCSV(df);
+        const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "salarios_politicos.csv";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+
+        URL.revokeObjectURL(url);
+      });
+    }
+
+    function renderAll() {
+      renderMetrics();
+      makeHistogram();
+      makeGenderKde();
+      makeAdminLevelChart();
+      makeRoleScatter();
+      makePartyTable();
+      makeMap();
+      renderSearchTable();
+    }
+
+    async function init() {
+      try {
+        const [cleanedRows, geoRowsRaw] = await Promise.all([
+          loadCSV(CLEANED_CSV_URL, ","),
+          loadCSV(GEO_CSV_URL, ",")
+        ]);
+
+        dfFull = normalizeCleanedRows(cleanedRows);
+        df = dfFull.filter(d => d.currentAnnualSalary > 0);
+
+        geoDf = geoRowsRaw.map(row => ({
+          municipality: row["Official Name Municipality"],
+          geoPoint: row["Geo Point"]
+        }));
+
+        document.getElementById("status").style.display = "none";
+        document.getElementById("app").style.display = "block";
+
+        setupDownload();
+        renderAll();
+
+        document.getElementById("excludeZeroSalary").addEventListener("change", makeMap);
+        
+        let searchTimeout;
+        document.getElementById("searchInput").addEventListener("input", () => {
+          clearTimeout(searchTimeout);
+          searchTimeout = setTimeout(renderSearchTable, 250);
+        });
+
+        window.addEventListener("resize", () => {
+          [
+            "histogram",
+            "genderKde",
+            "adminLevel",
+            "roleScatter",
+            "map"
+          ].forEach(id => Plotly.Plots.resize(document.getElementById(id)));
+        });
+      } catch (error) {
+        console.error(error);
+        const status = document.getElementById("status");
+        status.className = "error";
+        status.innerHTML = `
+          Error cargando los datos. Asegúrate de que
+          <code>cleaned.csv</code> y <code>georef-spain-municipio.csv</code>
+          están en la misma carpeta que este HTML y que lo estás sirviendo con un servidor estático.
+          <br><br>
+          Detalle: ${escapeHtml(error.message)}
+        `;
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
